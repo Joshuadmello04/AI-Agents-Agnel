@@ -7,8 +7,16 @@ from prohibited_items import find_prohibited
 import json
 app = FastAPI()
 
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_4_precalc.pkl', "rb") as G:
+with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
+
+#CO2 emission factors
+EMISSION_FACTORS = {
+    "sea": 0.01,  # 10g per ton-km
+    "land": 0.1,  # 100g per ton-km
+    "air": 0.7,   # 700g per ton-km
+}
+
 
 # Constants
 time_min, time_max = 0, 740.8010060257351
@@ -99,16 +107,14 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
     print(completed_paths)
     return [{
         "path": path,
-        "path_coords": [(multigraph.nodes[node]['latitude'], multigraph.nodes[node]['longitude']) for node in path],
         "edges": [{
             "from": edge[0], "to": edge[1], "mode": edge[3]['mode'],
-            "time": edge[3]['time'], "price": edge[3]['price']
+            "time": edge[3]['time'], "price": edge[3]['price'], "distance": edge[3]['distance']
         } for edge in edges],
         "time_sum": sum(edge[3]['time'] for edge in edges),
         "price_sum": sum(edge[3]['price'] for edge in edges),
-        "distance_sum": sum(haversine(multigraph.nodes[edge[0]]['latitude'], multigraph.nodes[edge[0]]['longitude'], 
-                                       multigraph.nodes[edge[1]]['latitude'], multigraph.nodes[edge[1]]['longitude'])
-                            for edge in edges)
+        "distance_sum": sum(edge[3]['distance'] for edge in edges),
+        "CO2_sum": sum(edge[3]['distance'] * EMISSION_FACTORS[edge[3]['mode']] for edge in edges)
     } for path, edges, cost in completed_paths[:top_n]]
 
 def make_avoid_list(description,prohibited_flag,restricted_flag):
@@ -137,7 +143,7 @@ import pickle
 app = FastAPI()
 
 # Load the graph
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_4_precalc.pkl', "rb") as G:
+with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 

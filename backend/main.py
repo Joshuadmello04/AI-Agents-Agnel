@@ -160,6 +160,7 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
     
     return [{
         "path": path,
+        "path_coods": [(multigraph.nodes[node]['latitude'], multigraph.nodes[node]['longitude']) for node in path],
         "edges": [{
             "from": edge[0], "to": edge[1], "mode": edge[3]['mode'],
             "time": edge[3]['time'], "price": edge[3]['price'], "distance": edge[3]['distance']

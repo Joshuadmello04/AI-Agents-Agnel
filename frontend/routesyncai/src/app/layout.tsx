@@ -7,7 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Shippod - Global Logistics Solutions",
+  title: "RouteSyncAI - Global Logistics Solutions",
   description: "Your trusted partner for global shipping and logistics services",
 }
 

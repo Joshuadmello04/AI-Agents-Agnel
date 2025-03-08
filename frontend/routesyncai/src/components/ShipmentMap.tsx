@@ -703,12 +703,12 @@ const ShipmentTracker = () => {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'delivered':
+    switch (status?.toUpperCase()) {
+      case 'DELIVERED':
         return 'bg-green-500';
-      case 'in_transit':
+      case 'IN_TRANSIT':
         return 'bg-blue-500';
-      case 'pending':
+      case 'PENDING':
         return 'bg-amber-500';
       default:
         return 'bg-gray-500';

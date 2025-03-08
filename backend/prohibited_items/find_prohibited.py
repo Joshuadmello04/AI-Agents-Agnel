@@ -9,7 +9,7 @@ import os
 load_dotenv()
 
 # Load JSON file
-json_path = r"C:\Users\joshd\Documents\Programming\IIT-B\prohibited_items\logistics_data.json"
+json_path = r"C:\Users\Asus\Desktop\RouteSyncAI\RouteSyncAI\backend\prohibited_items\logistics_data.json"
 with open(json_path, "r", encoding='utf-8') as f:
     logistics_data = json.load(f)
 

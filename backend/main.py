@@ -7,7 +7,7 @@ from prohibited_items import find_prohibited
 import json
 app = FastAPI()
 
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
+with open(r'C:\Users\Asus\Desktop\RouteSyncAI\RouteSyncAI\backend\graph_final_5_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 #CO2 emission factors
@@ -143,7 +143,7 @@ import pickle
 app = FastAPI()
 
 # Load the graph
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
+with open(r'C:\Users\Asus\Desktop\RouteSyncAI\RouteSyncAI\backend\graph_final_5_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 

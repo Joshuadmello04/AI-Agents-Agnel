@@ -107,7 +107,12 @@ const ShipmentTracker = () => {
   useEffect(() => {
     if (map.current || !mapContainer.current) return
 
-    maptilersdk.config.apiKey = "WPOrYvLmOvXmyuTyNP5h"
+    const apiKey = process.env.NEXT_PUBLIC_MAPTILER_API_KEY;
+    if (apiKey) {
+      maptilersdk.config.apiKey = apiKey;
+    } else {
+      console.error("MapTiler API key is not defined");
+    }
     map.current = new maptilersdk.Map({
       container: mapContainer.current,
       style: maptilersdk.MapStyle.STREETS,

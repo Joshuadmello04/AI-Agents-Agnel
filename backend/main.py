@@ -7,7 +7,7 @@ from prohibited_items import find_prohibited
 import json
 app = FastAPI()
 
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
+with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 #CO2 emission factors
@@ -15,6 +15,39 @@ EMISSION_FACTORS = {
     "sea": 0.01,  # 10g per ton-km
     "land": 0.1,  # 100g per ton-km
     "air": 0.7,   # 700g per ton-km
+}
+
+waiting_times = {
+    "CN": 117.7,
+    "AU": 187.1,
+    "US": 118.2,
+    "BR": 366.3,
+    "RU": 106.8,
+    "CA": 126.5,
+    "AR": 55.7,
+    "ZA": 237.5,
+    "JP": 68.4,
+    "IN": 90.0,
+    "UA": 58.8,
+    "AE": 79.2,
+    "ID": 63.4,
+    "KR": 74.7,
+    "NZ": 64.8,
+    "CL": 280.3,
+    "TR": 130.1,
+    "VN": 48.6,
+    "CO": 83.4,
+    "MY": 126.5,
+    "MX": 109.2,
+    "TW": 71.3,
+    "PE": 196.5,
+    "OM": 85.4,
+    "NO": 45.2,
+    "FR": 58.4,
+    "SA": 89.5,
+    "MA": 227.4,
+    "RO": 83.5,
+    "MZ": 265.3
 }
 
 
@@ -58,15 +91,15 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
         return {"error": f"No valid route: Start ({start}) or goal ({goal}) is in a banned country."}
     
     heuristic_dict = precompute_heuristics(multigraph, goal, time_weight, price_weight)
-    queue = [(0, 0, 0, start, [start], [])]
+    queue = [(0, 0, 0, start, [start], [], 0)]
     visited = set()
     counter = 0
     completed_paths = []
     
     while queue:
-        f_cost, g_cost, _, current, path, edge_details = heapq.heappop(queue)
+        f_cost, g_cost, _, current, path, edge_details, total_wait_time = heapq.heappop(queue)
         if current == goal:
-            completed_paths.append((path, edge_details, g_cost))
+            completed_paths.append((path, edge_details, g_cost, total_wait_time))
             if len(completed_paths) >= top_n:
                 completed_paths.sort(key=lambda x: x[2])
                 if f_cost > completed_paths[top_n-1][2]:
@@ -88,9 +121,17 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
                 restricted_penalty = 1
             else:
                 restricted_penalty = 0
-     
+         
             border_penalty = 1 if current_country != neighbor_country else 0
-
+            
+            # Add waiting times based on transport mode
+            mode_waiting_time = 0
+            if data['mode'] == 'sea' :
+                mode_waiting_time=waiting_times.get(neighbor_country,89.5)/2
+            elif data['mode'] == 'air':
+                mode_waiting_time = 2  # Base airport handling time (example value)
+            
+            new_wait_time = total_wait_time + mode_waiting_time
             new_g_cost = g_cost + time_weight*data['time_norm'] + price_weight*data['price_norm'] + border_penalty + restricted_penalty
             h_cost = heuristic_dict[neighbor]
             new_f_cost = new_g_cost + h_cost
@@ -99,12 +140,12 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
             new_edge_details = edge_details + [(current, neighbor, key, data)]
 
             counter += 1
-            heapq.heappush(queue, (new_f_cost, new_g_cost, counter, neighbor, new_path, new_edge_details))
+            heapq.heappush(queue, (new_f_cost, new_g_cost, counter, neighbor, new_path, new_edge_details, new_wait_time))
     
     completed_paths.sort(key=lambda x: x[2])
     if not completed_paths:
         return {"error": f"No paths found between {start} and {goal} with selected parameters."}
-    print(completed_paths)
+    
     return [{
         "path": path,
         "edges": [{
@@ -114,8 +155,10 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
         "time_sum": sum(edge[3]['time'] for edge in edges),
         "price_sum": sum(edge[3]['price'] for edge in edges),
         "distance_sum": sum(edge[3]['distance'] for edge in edges),
-        "CO2_sum": sum(edge[3]['distance'] * EMISSION_FACTORS[edge[3]['mode']] for edge in edges)
-    } for path, edges, cost in completed_paths[:top_n]]
+        "CO2_sum": sum(edge[3]['distance'] * EMISSION_FACTORS[edge[3]['mode']] for edge in edges),
+        "total_waiting_time": wait_time
+    } for path, edges, cost, wait_time in completed_paths[:top_n]]
+
 
 def make_avoid_list(description,prohibited_flag,restricted_flag):
     if prohibited_flag == "ignore" and restricted_flag == "ignore":
@@ -143,7 +186,7 @@ import pickle
 app = FastAPI()
 
 # Load the graph
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "rb") as G:
+with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 

@@ -1,16 +1,13 @@
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query
 import pickle
 import heapq
 from math import radians, sin, cos, sqrt, atan2
 from typing import List, Optional, Literal
 from prohibited_items import find_prohibited
-from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from safety_analysis.analysis import get_incidents_for_places
 import json
-
-# Create a single FastAPI instance
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
-
 
 app.add_middleware(
     CORSMiddleware,
@@ -20,17 +17,17 @@ app.add_middleware(
     allow_headers=["Content-Type", "Access-Control-Allow-Origin", "xxx"],
     expose_headers=["*"],
 )
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
-     roadsn = pickle.load(G)
 
-    
-# CO2 emission factors
+
+with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
+    roadsn = pickle.load(G)
+
+#CO2 emission factors
 EMISSION_FACTORS = {
     "sea": 0.01,  # 10g per ton-km
     "land": 0.1,  # 100g per ton-km
     "air": 0.7,   # 700g per ton-km
 }
-
 
 waiting_times = {
     "CN": 117.7,
@@ -66,7 +63,6 @@ waiting_times = {
 }
 
 
-
 # Constants
 time_min, time_max = 0, 740.8010060257351
 price_min, price_max = 0, 49341.63950694249
@@ -96,7 +92,7 @@ def precompute_heuristics(multigraph, goal, time_weight, price_weight):
         heuristic_dict[node] = time_weight * time_norm + price_weight * price_norm
     return heuristic_dict
 
-def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, penalty_countries=None, top_n=3, time_weight=0.3, price_weight=0.3, allowed_modes=['land','sea','air']):
+def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, penalty_countries=None, top_n=3, time_weight=0.3, price_weight=0.3, allowed_modes=['land','sea','air'],weight=30000):
     if start not in multigraph or goal not in multigraph:
         return {"error": "Start or goal node not in graph"}
     
@@ -168,32 +164,27 @@ def astar_top_n_avoid_countries(multigraph, start, goal, avoid_countries=None, p
             "from": edge[0], "to": edge[1], "mode": edge[3]['mode'],
             "time": edge[3]['time'], "price": edge[3]['price'], "distance": edge[3]['distance']
         } for edge in edges],
-        "time_sum": sum(edge[3]['time'] for edge in edges),
-        "price_sum": sum(edge[3]['price'] for edge in edges),
+        "time_sum_without_waiting": sum(edge[3]['time'] for edge in edges),
+        "price_sum": sum(edge[3]['price'] for edge in edges)* (weight/995 if  weight < 995 else (weight-995)*2),
         "distance_sum": sum(edge[3]['distance'] for edge in edges),
         "CO2_sum": sum(edge[3]['distance'] * EMISSION_FACTORS[edge[3]['mode']] for edge in edges),
         "total_waiting_time": wait_time
     } for path, edges, cost, wait_time in completed_paths[:top_n]]
 
 
-def make_avoid_list(description, prohibited_flag, restricted_flag):
+def make_avoid_list(description,prohibited_flag,restricted_flag):
     if prohibited_flag == "ignore" and restricted_flag == "ignore":
         return {}
-    response = find_prohibited.ask_gemini(description)
-    
-    if isinstance(response, str):
-        result_dict = json.loads(response)
-    else:
-        result_dict = response
-    
+    response=find_prohibited.ask_gemini(description)
+    result_dict=json.loads(response)
     if prohibited_flag == "ignore" and restricted_flag == "penalty":
-        return {'penalty_countries': result_dict['restricted_in']}
+        return {'penalty_countries':result_dict['restricted_in']}
     elif prohibited_flag == "ignore" and restricted_flag == "avoid":
-        return {'avoid_countries': result_dict['restricted_in']}
+        return {'avoid_countries':result_dict['restricted_in']}
     elif prohibited_flag == "avoid" and restricted_flag == "ignore":
-        return {'avoid_countries': result_dict['prohibited_in']}
+        return {'avoid_countries':result_dict['prohibited_in']}
     elif prohibited_flag == "avoid" and restricted_flag == "penalty":
-        return {'penalty_countries': result_dict['restricted_in'], "avoid_countries": result_dict['prohibited_in']}
+        return {'penalty_countries':result_dict['restricted_in'],"avoid_countries":result_dict['prohibited_in']}
     elif prohibited_flag == "avoid" and restricted_flag == "avoid":
         return {'avoid_countries':result_dict['prohibited_in'] + result_dict['restricted_in']}
 
@@ -210,6 +201,8 @@ app = FastAPI()
 with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
+class SafetyRequest(BaseModel):
+    path: List[str]
 
 # Define request model
 class PathRequest(BaseModel):
@@ -221,38 +214,32 @@ class PathRequest(BaseModel):
     price_weight: float = Field(0.5, ge=0.0, le=1.0)
     allowed_modes: List[str] = ["land", "sea", "air"]
     prohibited_flag: Literal["ignore", "avoid"] = "ignore"
-    restricted_flag: Literal["ignore", "avoid", "penalty"] = "ignore"
+    restricted_flag: Literal["ignore", "avoid","penalty"] = "ignore"
     description: str
+    weight: int
 
 @app.post("/find_paths/")
 async def find_paths(request: PathRequest):
-    # Print the received request for debugging
-    print(f"Received request: {request}")
-    
     # Ensure time_weight + price_weight sums to 1
-    if request.time_weight + request.price_weight < 0.99 or request.time_weight + request.price_weight > 1.01:
+    if round(request.time_weight + request.price_weight, 5) != 1.0:
         raise HTTPException(status_code=400, detail="time_weight and price_weight must sum to 1")
 
-    try:
-        combined_dict = make_avoid_list(request.description, request.prohibited_flag, request.restricted_flag)
-        paths = astar_top_n_avoid_countries(
-            roadsn,
-            start=request.start,
-            goal=request.goal,
-            avoid_countries=request.avoid_countries + combined_dict.get('avoid_countries', []),
-            penalty_countries=combined_dict.get('penalty_countries', []),
-            top_n=request.top_n,
-            time_weight=request.time_weight,
-            price_weight=request.price_weight,
-            allowed_modes=request.allowed_modes
-        )
+    combined_dict=make_avoid_list(request.description,request.prohibited_flag,request.restricted_flag)
+    paths = astar_top_n_avoid_countries(
+        roadsn,
+        start=request.start,
+        goal=request.goal,
+        avoid_countries=request.avoid_countries+ combined_dict.get('avoid_countries', []),
+        penalty_countries=combined_dict.get('penalty_countries', []),
+        top_n=request.top_n,
+        time_weight=request.time_weight,
+        price_weight=request.price_weight,
+        allowed_modes=request.allowed_modes,
+        weight=request.weight
+    )
 
-        return {
-            "avoided_countries": request.avoid_countries + combined_dict.get('avoid_countries', []),
-            "penalty_countries": combined_dict.get('penalty_countries', []),
-            "paths": paths
-        }
-    except Exception as e:
-        print(f"Error processing request: {e}")
-        raise HTTPException(status_code=500, detail=f"An error occurred: {str(e)}")
+    return {"avoided_countries":request.avoid_countries+ combined_dict.get('avoid_countries', []),"penalty_countries":combined_dict.get('penalty_countries', []),"paths": paths}
 
+@app.post("/safety_analysis/")
+async def safety_analysis(request: SafetyRequest):
+    return get_incidents_for_places(request.path)

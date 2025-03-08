@@ -7,6 +7,15 @@ from prohibited_items import find_prohibited
 import json
 app = FastAPI()
 
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Access-Control-Allow-Origin", "xxx"],
+    expose_headers=["*"],
+)
 with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_8_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 

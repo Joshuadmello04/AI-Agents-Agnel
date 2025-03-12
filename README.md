@@ -50,7 +50,12 @@ uvicorn main:app --reload
 
 
 ---
-🙌 Acknowledgments
+### **🙌 Acknowledgments**
 A big thanks to Softlink Global, IOER IIT Bombay, and All Masters for organizing LogiThon 2025, fostering innovation, and bridging the gap between academia and industry!
 ---
+
+### **👥 Contributors**
+- **Aditya Rathod**
+- **Joshua DMello**
+- **Joshua D’Sylva**
 

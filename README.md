@@ -2,7 +2,7 @@
 
 An **AI-powered logistics optimization tool** that determines the most efficient **cross-border shipping routes** using multiple transport modes (**air, sea, land, or hybrid combinations**). It optimizes key constraints like **cost, transit time, regulatory feasibility, and carbon footprint**.  
 
-Developed during **LogiThon 2025 (IIT Bombay)**, this project leverages AI and geospatial data to enhance decision-making in logistics and supply chain management.  
+Developed during **LogiThon 2025 (IIT Bombay)** and **Softlink Global**, this project leverages AI and geospatial data to enhance decision-making in logistics and supply chain management.  
 
 ---
 
@@ -43,17 +43,13 @@ uvicorn main:app --reload
 ```
 ---
 ### **Output Screenshot**  
-![Screenshot 2025-03-12 183443](https://github.com/user-attachments/assets/eb2898f8-b27c-4658-a303-1e4243bbc357)
 ![Screenshot 2025-03-12 183156](https://github.com/user-attachments/assets/9da3efdb-f3e1-413a-aafe-5dc531f3bba8)
 ![Screenshot 2025-03-12 183230](https://github.com/user-attachments/assets/45b67bda-69a5-4aa5-9bd7-059daf2761fd)
 ![Screenshot 2025-03-12 183343](https://github.com/user-attachments/assets/9e4248cf-2392-4d5e-802b-df28dc7be019)
 
 
 ---
-### **🙌 Acknowledgments**
 
-A big thanks to Softlink Global, IOER IIT Bombay, and All Masters for organizing LogiThon 2025, fostering innovation, and bridging the gap between academia and industry!
----
 
 ### **👥 Contributors**
 - **Aditya Rathod**

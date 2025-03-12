@@ -7,7 +7,6 @@ import { RouteMap } from "@/components/route-map";
 import { RouteList } from "@/components/route-list";
 import type { RouteResponse } from "@/lib/types";
 
-// Define cargo type options
 const CARGO_TYPES = [
   { value: "general", label: "General Merchandise" },
   { value: "perishable", label: "Perishable Goods" },
@@ -17,7 +16,6 @@ const CARGO_TYPES = [
   { value: "liquid", label: "Liquid Cargo" },
 ];
 
-// Transport modes
 const TRANSPORT_MODES = [
   { value: "land", label: "Land" },
   { value: "sea", label: "Sea" },
@@ -46,219 +44,199 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null);
   const [selectedRoute, setSelectedRoute] = useState<number>(0);
 
+  const handleModeChange = (mode: string) => {
+    setFormData(prev => ({
+      ...prev,
+      allowed_modes: prev.allowed_modes.includes(mode)
+        ? prev.allowed_modes.filter(m => m !== mode)
+        : [...prev.allowed_modes, mode]
+    }));
+  };
+
+  const handleAddCountry = () => {
+    if (countryInput && !formData.avoid_countries.includes(countryInput.toUpperCase())) {
+      setFormData(prev => ({
+        ...prev,
+        avoid_countries: [...prev.avoid_countries, countryInput.toUpperCase()]
+      }));
+      setCountryInput("");
+    }
+  };
+
+  const handleRemoveCountry = (country: string) => {
+    setFormData(prev => ({
+      ...prev,
+      avoid_countries: prev.avoid_countries.filter(c => c !== country)
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/find_paths/", {
-        method: "POST",
+      const response = await fetch('http://127.0.0.1:8000/find_paths/', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch routes");
+        throw new Error('Failed to calculate routes');
       }
 
       const data = await response.json();
-      if ('error' in data) {
-        setError(data.error);
-        setRoutes(null);
-      } else {
-        setRoutes(data);
-        setSelectedRoute(0);
-      }
+      setRoutes(data);
+      setSelectedRoute(0);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-      setRoutes(null);
+      setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
     }
   };
 
-  // Handler for adding countries to avoid
-  const handleAddCountry = () => {
-    if (countryInput.trim() && !formData.avoid_countries.includes(countryInput.trim().toUpperCase())) {
-      setFormData({
-        ...formData,
-        avoid_countries: [...formData.avoid_countries, countryInput.trim().toUpperCase()]
-      });
-      setCountryInput("");
-    }
-  };
-
-  // Handler for removing countries from avoid list
-  const handleRemoveCountry = (country: string) => {
-    setFormData({
-      ...formData,
-      avoid_countries: formData.avoid_countries.filter(c => c !== country)
-    });
-  };
-
-  // Handler for transport mode checkboxes
-  const handleModeChange = (mode: string) => {
-    const currentModes = [...formData.allowed_modes];
-    
-    if (currentModes.includes(mode)) {
-      // Don't allow removing the last transport mode
-      if (currentModes.length > 1) {
-        setFormData({
-          ...formData,
-          allowed_modes: currentModes.filter(m => m !== mode)
-        });
-      }
-    } else {
-      setFormData({
-        ...formData,
-        allowed_modes: [...currentModes, mode]
-      });
-    }
-  };
-
   return (
-    <div className="min-h-screen logistics-gradient text-foreground">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
       <div className="max-w-[1400px] mx-auto p-6">
-        <div className="flex items-center space-x-3 mb-8">
-          <Box className="w-8 h-8 text-primary" />
-          <h1 className="text-2xl font-bold">LogisticsPro Route Optimizer</h1>
+        <div className="flex items-center space-x-4 mb-8 bg-white/5 backdrop-blur-lg p-6 rounded-2xl border border-white/10 shadow-xl">
+          <Box className="w-12 h-12 text-sky-400" />
+          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-blue-500 to-indigo-500">
+            LogisticsPro Route Optimizer
+          </h1>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div className="card-gradient rounded-lg p-6 shadow-xl">
-              <h2 className="text-xl font-semibold mb-6">Shipment Details</h2>
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Origin</label>
+          <div className="space-y-8">
+            <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-2xl transition-all duration-300 hover:shadow-sky-500/10">
+              <h2 className="text-2xl font-semibold mb-8 text-sky-400">Shipment Details</h2>
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-sky-300">Origin</label>
                     <input
                       type="text"
                       value={formData.start}
                       onChange={(e) => setFormData({ ...formData, start: e.target.value })}
-                      className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                       required
+                      placeholder="Enter origin"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Destination</label>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-sky-300">Destination</label>
                     <input
                       type="text"
                       value={formData.goal}
                       onChange={(e) => setFormData({ ...formData, goal: e.target.value })}
-                      className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                       required
+                      placeholder="Enter destination"
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-2">Cargo Description</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-sky-300">Cargo Description</label>
                   <input
                     type="text"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                     required
+                    placeholder="Describe your cargo"
                   />
                 </div>
 
-                {/* Cargo Type Dropdown */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Cargo Type</label>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-sky-300">Cargo Type</label>
                     <select
                       value={formData.cargo_type}
                       onChange={(e) => setFormData({ ...formData, cargo_type: e.target.value })}
-                      className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                     >
                       {CARGO_TYPES.map((type) => (
-                        <option key={type.value} value={type.value}>
+                        <option key={type.value} value={type.value} className="bg-slate-800 text-white">
                           {type.label}
                         </option>
                       ))}
                     </select>
                   </div>
                   
-                  {/* Weight Input */}
-                  <div>
-                    <label className="block text-sm font-medium mb-2">Weight (kg)</label>
+                  <div className="space-y-2">
+                    <label className="block text-sm font-medium text-sky-300">Weight (kg)</label>
                     <input
                       type="number"
                       min="0"
                       value={formData.weight}
                       onChange={(e) => setFormData({ ...formData, weight: Number(e.target.value) })}
-                      className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                       required
+                      placeholder="Enter weight"
                     />
                   </div>
                 </div>
 
-                {/* Number of Routes to Generate */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Number of Routes to Generate</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-sky-300">Number of Routes</label>
                   <input
                     type="number"
                     min="1"
                     max="5"
                     value={formData.top_n}
                     onChange={(e) => setFormData({ ...formData, top_n: Number(e.target.value) })}
-                    className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                   />
                 </div>
 
-                {/* Transportation Mode Checkboxes */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Allowed Transportation Modes</label>
-                  <div className="flex flex-wrap gap-4">
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-sky-300">Transportation Modes</label>
+                  <div className="flex flex-wrap gap-6">
                     {TRANSPORT_MODES.map((mode) => (
-                      <label key={mode.value} className="flex items-center space-x-2">
+                      <label key={mode.value} className="relative flex items-center space-x-3 cursor-pointer group">
                         <input
                           type="checkbox"
                           checked={formData.allowed_modes.includes(mode.value)}
                           onChange={() => handleModeChange(mode.value)}
-                          className="rounded border-gray-300"
+                          className="w-5 h-5 border-2 border-sky-500/30 rounded bg-white/5 text-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-colors"
                         />
-                        <span>{mode.label}</span>
+                        <span className="text-sm font-medium group-hover:text-sky-400 transition-colors">{mode.label}</span>
                       </label>
                     ))}
                   </div>
                 </div>
 
-                {/* Countries to Avoid */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Countries to Avoid (ISO-2 codes, e.g., US, CN, DE)
-                  </label>
-                  <div className="flex gap-2 mb-2">
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-sky-300">Countries to Avoid</label>
+                  <div className="flex gap-3">
                     <input
                       type="text"
                       value={countryInput}
                       onChange={(e) => setCountryInput(e.target.value.slice(0, 2))}
-                      placeholder="Enter country code"
-                      className="flex-1 bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                      placeholder="ISO-2 code (e.g., US)"
+                      className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                       maxLength={2}
                     />
                     <button
                       type="button"
                       onClick={handleAddCountry}
-                      className="bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors"
+                      className="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 rounded-xl font-medium hover:from-sky-600 hover:to-blue-700 transition-all duration-200 shadow-lg hover:shadow-sky-500/25"
                     >
                       Add
                     </button>
                   </div>
                   {formData.avoid_countries.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-2 mt-3">
                       {formData.avoid_countries.map((country) => (
-                        <div key={country} className="bg-secondary/70 text-foreground px-2 py-1 rounded-md flex items-center space-x-1">
+                        <div key={country} className="bg-white/10 px-4 py-2 rounded-lg flex items-center space-x-2 group">
                           <span>{country}</span>
                           <button
                             type="button"
                             onClick={() => handleRemoveCountry(country)}
-                            className="text-destructive hover:text-destructive/90 transition-colors"
+                            className="text-red-400 hover:text-red-300 transition-colors"
                           >
                             ×
                           </button>
@@ -268,9 +246,8 @@ export default function Home() {
                   )}
                 </div>
 
-                {/* Time/Cost Priority Slider */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Priority Weighting</label>
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-sky-300">Priority Weighting</label>
                   <input
                     type="range"
                     min="0"
@@ -285,31 +262,30 @@ export default function Home() {
                         price_weight: 1 - timeWeight,
                       });
                     }}
-                    className="w-full"
+                    className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-sky-500 [&::-webkit-slider-thumb]:appearance-none hover:[&::-webkit-slider-thumb]:bg-sky-400 transition-colors"
                   />
-                  <div className="flex justify-between text-sm mt-1">
-                    <span>Cost Priority</span>
-                    <span>Time Priority</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-sky-300">Cost Priority</span>
+                    <span className="text-sky-300">Time Priority</span>
                   </div>
                 </div>
 
-                {/* Prohibited Flag Option */}
-                <div>
-                  <label className="block text-sm font-medium mb-2">Prohibited Country Handling</label>
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-sky-300">Prohibited Country Handling</label>
                   <select
                     value={formData.prohibited_flag}
                     onChange={(e) => setFormData({ ...formData, prohibited_flag: e.target.value })}
-                    className="w-full bg-secondary/50 border border-border rounded-md p-2 text-foreground"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:border-sky-500 focus:ring-2 focus:ring-sky-500/20 transition-all duration-200"
                   >
-                    <option value="avoid">Avoid if possible</option>
-                    <option value="strict">Strictly avoid</option>
+                    <option value="avoid" className="bg-slate-800">Avoid if possible</option>
+                    <option value="strict" className="bg-slate-800">Strictly avoid</option>
                   </select>
                 </div>
 
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="w-full py-4 px-6 bg-gradient-to-r from-sky-500 via-blue-600 to-indigo-500 rounded-xl font-semibold text-lg shadow-lg hover:shadow-sky-500/25 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 hover:scale-[1.02]"
                 >
                   {loading ? "Calculating Routes..." : "Calculate Routes"}
                 </button>
@@ -327,48 +303,49 @@ export default function Home() {
 
           <div className="space-y-6">
             {error && (
-              <div className="bg-destructive/10 border border-destructive text-destructive-foreground px-4 py-3 rounded-lg">
-                {error}
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-6 py-4 rounded-xl flex items-center space-x-3">
+                <AlertTriangle className="w-5 h-5" />
+                <p>{error}</p>
               </div>
             )}
 
             {loading ? (
-              <div className="space-y-4">
-                <Skeleton className="h-[400px] w-full rounded-lg" />
-                <Skeleton className="h-[200px] w-full rounded-lg" />
+              <div className="space-y-6">
+                <Skeleton className="h-[400px] w-full rounded-xl" />
+                <Skeleton className="h-[200px] w-full rounded-xl" />
               </div>
             ) : routes && Array.isArray(routes.paths) ? (
               <>
-                <div className="card-gradient rounded-lg p-6 shadow-xl">
-                  <div className="flex items-center space-x-2 mb-4">
-                    <Navigation className="w-5 h-5 text-primary" />
-                    <h2 className="text-xl font-semibold">Route Visualization</h2>
+                <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-2xl transition-all duration-300 hover:shadow-sky-500/10">
+                  <div className="flex items-center space-x-3 mb-6">
+                    <Navigation className="w-6 h-6 text-sky-400" />
+                    <h2 className="text-2xl font-semibold text-sky-400">Route Visualization</h2>
                   </div>
-                  <div className="h-[400px] w-full map-container">
+                  <div className="h-[400px] w-full rounded-xl overflow-hidden shadow-lg">
                     <RouteMap route={routes.paths[selectedRoute]} />
                   </div>
                 </div>
 
-                <div className="card-gradient rounded-lg p-6 shadow-xl">
-                  <h3 className="text-lg font-semibold mb-4">Route Information</h3>
+                <div className="bg-white/5 backdrop-blur-lg rounded-2xl p-8 border border-white/10 shadow-2xl transition-all duration-300 hover:shadow-sky-500/10">
+                  <h3 className="text-xl font-semibold mb-6 text-sky-400">Route Information</h3>
                   {routes.avoided_countries.length > 0 && (
-                    <div className="mb-4">
-                      <div className="flex items-center space-x-2 text-yellow-400 mb-2">
+                    <div className="mb-6">
+                      <div className="flex items-center space-x-2 text-amber-400 mb-3">
                         <AlertTriangle className="w-5 h-5" />
                         <span className="font-medium">Avoided Countries</span>
                       </div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-white/70">
                         {routes.avoided_countries.join(", ")}
                       </p>
                     </div>
                   )}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {routes.paths[selectedRoute].edges.map((edge, i) => (
-                      <div key={i} className="flex items-center space-x-2 text-sm">
-                        <span className="font-medium">{edge.from}</span>
-                        <span className="text-muted-foreground">→</span>
-                        <span className="font-medium">{edge.to}</span>
-                        <span className="text-muted-foreground">({edge.mode})</span>
+                      <div key={i} className="flex items-center space-x-3 text-sm bg-white/5 p-4 rounded-xl border border-white/10">
+                        <span className="font-medium text-sky-300">{edge.from}</span>
+                        <span className="text-white/50">→</span>
+                        <span className="font-medium text-sky-300">{edge.to}</span>
+                        <span className="px-3 py-1 bg-white/10 rounded-full text-white/70">({edge.mode})</span>
                       </div>
                     ))}
                   </div>

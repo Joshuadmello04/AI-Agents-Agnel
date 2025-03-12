@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import {
   Play,
@@ -25,8 +26,11 @@ import { cn } from "@/lib/utils"
 import { Card, CardContent } from "@/components/ui/card"
 import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from "@/components/ui/carousel"
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { useAuth } from "@clerk/nextjs"
 
 export default function Home() {
+  const router = useRouter()
+  const { isSignedIn, userId } = useAuth()
   const [isPlaying, setIsPlaying] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
@@ -41,6 +45,15 @@ export default function Home() {
     window.addEventListener("scroll", handleScroll)
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
+
+  // Function to handle auth button click
+  const handleAuthClick = () => {
+    if (isSignedIn) {
+      router.push("/dashboard") // Redirect to dashboard or profile page
+    } else {
+      router.push("/sign-in") // Redirect to Clerk sign-in page
+    }
+  }
 
   // Animation variants
   const fadeIn = {
@@ -76,7 +89,9 @@ export default function Home() {
             <div className="w-8 h-8 bg-[#FF5C28] rounded-md flex items-center justify-center">
               <Ship className="w-5 h-5 text-primary-foreground" />
             </div>
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">RouteSyncAI</span>
+            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
+              RouteSyncAI
+            </span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -100,10 +115,12 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-4">
-            <Button className="hidden md:flex bg-[#FF5C28]  text-white rounded-full px-6 shadow-lg shadow-primary/20">
-              Get In Touch
+            <Button
+              className="hidden md:flex bg-[#FF5C28] text-white rounded-full px-6 shadow-lg shadow-primary/20"
+              onClick={handleAuthClick}
+            >
+              {isSignedIn ? "My Account" : "Get In Touch"}
             </Button>
-
             {/* Mobile menu button */}
             <Button
               variant="ghost"
@@ -138,8 +155,11 @@ export default function Home() {
                   {item}
                 </Link>
               ))}
-              <Button className="w-full bg-[#FF5C28] hover:bg-[#FF5C28]/90 text-white rounded-full mt-4">
-                Get In Touch
+              <Button
+                className="w-full bg-[#FF5C28] hover:bg-[#FF5C28]/90 text-white rounded-full mt-4"
+                onClick={handleAuthClick}
+              >
+                {isSignedIn ? "My Account" : "Get In Touch"}
               </Button>
               <div className="pt-2 border-t dark:border-gray-800">
                 <ThemeToggle />
@@ -177,14 +197,16 @@ export default function Home() {
             TO WHEREVER YOU NEED IT.
           </h1>
           <p className="text-sm md:text-base text-muted-foreground max-w-2xl mx-auto leading-relaxed mb-8">
-            Transport means the movement of goods, services and passengers from one place to another. We provide the
+            Transport means the movement of goods and services from one place to another. We provide the
             utility of place and time, linking production, distribution, exchange and all related activities.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button className="bg-[#FF5C28] hover:bg-[#FF5C28]/90 text-white rounded-full px-8 py-6 group shadow-lg shadow-primary/20">
+            <Link href="/new">
               LEARN MORE
+              </Link>
               <ArrowRight className="h-4 w-4 ml-2 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button variant="outline" className="rounded-full px-8 py-6 border-2  hover:bg-[#FF5C28]/90">
@@ -193,6 +215,7 @@ export default function Home() {
           </div>
         </motion.div>
 
+        {/* Rest of the component remains unchanged */}
         {/* Hero Image with Stats */}
         <motion.div
           initial="hidden"
@@ -488,7 +511,10 @@ export default function Home() {
                     <Button className="bg-black text-white hover:bg-white/20 rounded-full px-8 shadow-lg">
                       Contact Now
                     </Button>
-                    <Button variant="outline" className="bg-black border-white text-white hover:bg-white/20 rounded-full px-8">
+                    <Button
+                      variant="outline"
+                      className="bg-black border-white text-white hover:bg-white/20 rounded-full px-8"
+                    >
                       Get a Quote
                     </Button>
                   </div>

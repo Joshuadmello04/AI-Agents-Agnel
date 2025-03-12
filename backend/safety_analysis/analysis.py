@@ -1,7 +1,7 @@
 import json
 
 # Load the JSON data
-with open(r"C:\Users\joshd\Documents\Programming\ISLP\incident_counts_by_node.json", "r") as f:
+with open(r"C:\Users\Asus\Desktop\RouteSyncAI\RouteSyncAI\backend\safety_analysis\incident_counts_by_node.json", "r") as f:
     incident_counts = json.load(f)
 
 def get_incidents_for_places(places):

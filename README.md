@@ -7,7 +7,7 @@ Developed during **LogiThon 2025 (IIT Bombay)**, this project leverages AI and g
 ---
 
 ## 🚀 Features  
-- ✅ **AI-powered Route Optimization** using **A* Algorithm** with dynamic heuristics  
+- ✅ **AI-powered Route Optimization** using **A star Algorithm** with dynamic heuristics  
 - ✅ **Multi-Modal Transport Support** (Air, Sea, Land & Hybrid combinations)  
 - ✅ **Optimized for Cost 💰, Time ⏳ & CO₂ Footprint 🌍**  
 - ✅ **Real-time Interactive Map** to visualize top **3-5 optimal routes** dynamically  
@@ -51,6 +51,7 @@ uvicorn main:app --reload
 
 ---
 ### **🙌 Acknowledgments**
+
 A big thanks to Softlink Global, IOER IIT Bombay, and All Masters for organizing LogiThon 2025, fostering innovation, and bridging the gap between academia and industry!
 ---
 

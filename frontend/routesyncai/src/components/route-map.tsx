@@ -508,7 +508,7 @@ export const RouteMap: React.FC<RouteMapProps> = ({ route }) => {
             <p className="text-black text-xs">Total Time: {formatTime(route.time_sum)}</p>
             <p className="text-black text-xs">Total Price: ${route.price_sum.toFixed(2)}</p>
             <p className="text-black text-xs">Total Distance: {route.distance_sum.toFixed(2)} km</p>
-            {route.CO2_sum && <p className="text-black text-xs">CO₂ Emissions: {route.CO2_sum.toFixed(2)} tons</p>}
+            {route.CO2_sum && <p className="text-black text-xs">CO₂ Emissions: {route.CO2_sum.toFixed(2)} kg</p>}
           </div>
         </div>
       )}

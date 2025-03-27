@@ -1,12 +1,11 @@
-import { Navbar } from "@/components/navbar"
-import { Hero } from "@/components/hero"
-import { Features } from "@/components/features"
-import { ComplianceChecker } from "@/components/compliance-checker"
-import { RouteSelector } from "@/components/route-selector"
-import { Pricing } from "@/components/pricing"
-import { Footer } from "@/components/footer"
-import { GlobeSection } from "@/components/globe-section"
-import { Globe } from "@/components/ui/globe"
+import { Navbar } from "@/components/navbar";
+import { Hero } from "@/components/hero";
+import { Features } from "@/components/features";
+import { ComplianceChecker } from "@/components/compliance-checker";
+import { RouteSelector } from "@/components/route-selector";
+import { Pricing } from "@/components/pricing";
+import { Footer } from "@/components/footer";
+import { GlobeSection } from "@/components/globe-section";
 
 export default function Home() {
   return (
@@ -15,7 +14,6 @@ export default function Home() {
       <Navbar />
       <Hero />
       <GlobeSection />
-      <Globe/>
       <Features />
       <ComplianceChecker />
       <RouteSelector />
@@ -27,6 +25,5 @@ export default function Home() {
       ></div>
       <Footer />
     </main>
-  )
+  );
 }
-

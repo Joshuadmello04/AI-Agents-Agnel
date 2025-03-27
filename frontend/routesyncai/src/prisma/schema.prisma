@@ -9,14 +9,14 @@ datasource db {
 
 model Shipment {
   id           String   @id @default(uuid())
-  origin       String // City, Airport, Port Name
-  destination  String // City, Airport, Port Name
-  cargo_weight Float // Weight in kg/tons
-  cargo_volume Float // Volume in cubic meters
-  priority     Priority // FASTEST, CHEAPEST, SAFEST
+  origin       String
+  destination  String
+  cargo_weight Float
+  cargo_volume Float
+  priority     Priority
   createdAt    DateTime @default(now())
-  status       Status // PENDING, IN_TRANSIT, DELIVERED
-  userId       String // Links to User
+  status       Status
+  userId       String
   user         User     @relation(fields: [userId], references: [id])
 
   routes Route[] @relation("ShipmentRoutes")

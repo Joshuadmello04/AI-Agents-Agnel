@@ -6,7 +6,7 @@ import heapq
 from math import radians, sin, cos, sqrt, atan2
 
 # Load graph
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5.pkl', "rb") as G:
+with open(r'C:\Users\Asus\Desktop\AI-Agnets_Agnel\AI-Agents-Agnel\backend\graph_final_8_precalc.pkl', "rb") as G:
     roadsn = pickle.load(G)
 
 # Precompute min-max normalization ranges
@@ -30,7 +30,7 @@ for u, v, data in roadsn.edges(data=True):
     
 
 # Save precomputed graph
-with open(r'C:\Users\joshd\Documents\Programming\IIT-B\graph_final_5_precalc.pkl', "wb") as G:
+with open(r'C:\Users\Asus\Desktop\AI-Agnets_Agnel\AI-Agents-Agnel\backend\graph_final_8_precalc.pkl', "wb") as G:
     pickle.dump(roadsn, G)
 
 

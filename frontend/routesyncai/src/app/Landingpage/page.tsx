@@ -6,7 +6,7 @@ import { RouteSelector } from "@/components/route-selector";
 import { Pricing } from "@/components/pricing";
 import { Footer } from "@/components/footer";
 import { GlobeSection } from "@/components/globe-section";
-
+import { HeroCTA } from "@/components/cta"
 export default function Home() {
   return (
     <main className="min-h-screen overflow-hidden">
@@ -23,6 +23,7 @@ export default function Home() {
           __html: `<elevenlabs-convai agent-id="mvNNb9R3OywTXCOoX1mX"></elevenlabs-convai><script src="https://elevenlabs.io/convai-widget/index.js" async type="text/javascript"></script>`,
         }}
       ></div>
+      <HeroCTA />
       <Footer />
     </main>
   );

@@ -57,16 +57,12 @@ export function Pricing() {
   ]
 
   return (
-    <section id="pricing" className="py-20 relative overflow-hidden bg-[#0a0118]">
-      {/* Grid background */}
-      <div className="absolute inset-0 -z-10 opacity-20 bg-[size:40px_40px] bg-[linear-gradient(to_right,#4f46e50f_1px,transparent_1px),linear-gradient(to_bottom,#4f46e50f_1px,transparent_1px)]"></div>
-
-      {/* Gradient background elements */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-purple-500/40 to-transparent"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-blue-500/40 to-transparent"></div>
-        <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-purple-600/20 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-1/4 left-1/4 w-[300px] h-[300px] bg-blue-600/20 rounded-full blur-3xl animate-pulse delay-300"></div>
+    <section id="pricing" className="text-white py-20 relative">
+      {/* Background elements */}
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent"></div>
+        <div className="absolute top-1/2 right-1/4 w-[400px] h-[400px] bg-blue-600/10 rounded-full blur-3xl"></div>
       </div>
 
       <div className="container max-w-7xl mx-auto px-4">
